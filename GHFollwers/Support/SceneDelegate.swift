@@ -16,6 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // 2. set windowscene
         // 3. root vc
         // 4. make key and visible
+        configureNavigationBar()
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
@@ -31,7 +32,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         searchVC.title = "Search"
         searchVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 0)
         let searchNC = UINavigationController(rootViewController: searchVC)
-
         return searchNC
     }
 
@@ -53,6 +53,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return tabBar
     }
     
+    
+    func configureNavigationBar() {
+        UINavigationBar.appearance().tintColor = .systemGreen
+    }
+
 
     
     

@@ -11,7 +11,7 @@ class SearchVC: UIViewController {
 
     private let logoIV = UIImageView()
     private let usernameTF = GFTextField(placeholder: "Enter a username")
-    private let callToActionButton = GFButton(backgroundColor: .systemGreen, title: "Search")
+    private let callToActionButton = GFButton(backgroundColor: .systemGreen, title: "Get Followers")
     
     private var isUsernameEntered: Bool { return !usernameTF.text!.isEmpty }
     
@@ -19,12 +19,12 @@ class SearchVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.systemBackground
-        configure()
+        configure()        
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.isNavigationBarHidden = true
+        navigationController?.setNavigationBarHidden(true, animated: true)
     }
     
     
@@ -44,7 +44,7 @@ class SearchVC: UIViewController {
     private func pushFollowerListVC() {
         guard isUsernameEntered else {
             print("No username");
-            presentGFAlertOnMainThread(title: "Empty Username", message: "please enter your username we need to know who to look for 😀.", buttonTitle: "Ok")
+            presentGFAlertOnMainThread(title: "Empty Username", message: "please enter your username we need to know who to look for 😀.", buttonTitle: "Get Followers")
             return
         }
         let followersVC = FollowersListVC()
