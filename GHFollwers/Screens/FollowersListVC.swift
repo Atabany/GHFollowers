@@ -9,6 +9,7 @@ import UIKit
 
 class FollowersListVC: UIViewController {
     
+    //MARK: - Vars
     enum Section: CaseIterable { case main }
     
     var username: String!
@@ -21,9 +22,11 @@ class FollowersListVC: UIViewController {
     var page = 1
     var hasMoreFollowers = true
     
+    //MARK: - Controller
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
+        configureSearchController()
         configureCollectionView()
         getFollowers(page: page)
         configureDataSource()
@@ -35,12 +38,22 @@ class FollowersListVC: UIViewController {
         navigationController?.setNavigationBarHidden(false, animated: true)
     }
     
-    
+    //MARK: - Configure
     private func configureViewController() {
         view.backgroundColor = UIColor.systemBackground
         navigationController?.navigationBar.prefersLargeTitles = true
     }
     
+    
+    func configureSearchController() {
+        let searchController                            = UISearchController()
+        searchController.searchResultsUpdater           = self
+        searchController.searchBar.delegate             = self
+        searchController.searchBar.placeholder = "Search for a username"
+        searchController.obscuresBackgroundDuringPresentation = false
+        navigationItem.hidesSearchBarWhenScrolling = false
+        navigationItem.searchController                 = searchController
+    }
     
     
     private func configureCollectionView() {
@@ -53,18 +66,22 @@ class FollowersListVC: UIViewController {
     }
     
     
-    
+    //MARK: - Get Data
     private func getFollowers(page: Int) {
+        self.showLoadingView()
         NetworkManager.shared.getFollowers(for: username, page: page) { [weak self] result in
             guard let self = self else {return}
+            self.dismissLoadingView()
             switch result {
             case .success(let followers):
-                if followers.count < 100 {
-                    self.hasMoreFollowers = false
+                if followers.count < 100 { self.hasMoreFollowers = false }
+                self.followers.append(contentsOf: followers)
+                if self.followers.isEmpty {
+                    let message = "This User doesn't have any followers 😞"
+                    DispatchQueue.main.async { self.showEmptyStateView(with: message, in: self.view)}
+                    return
                 }
-                self.followers += followers
-                self.updateData()
-                print(followers)
+                self.updateData(on: self.followers)
             case .failure(let error):
                 self.presentGFAlertOnMainThread(title: "Bad stuff happend", message: error.rawValue, buttonTitle: "Ok")
                 return
@@ -74,6 +91,7 @@ class FollowersListVC: UIViewController {
     
     
     
+    //MARK: - Diffable Data Source - Cell
     private func configureDataSource() {
         dataSource = UICollectionViewDiffableDataSource<Section, Follower>(collectionView: collectionView)  { collectionView, indexPath, follower in
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FollowerCell.reuseId, for: indexPath) as? FollowerCell else {
@@ -85,7 +103,7 @@ class FollowersListVC: UIViewController {
     }
     
     
-    private func updateData() {
+    private func updateData(on followers: [Follower]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Follower>()
         snapshot.appendSections([.main])
         snapshot.appendItems(followers, toSection: .main)
@@ -93,22 +111,15 @@ class FollowersListVC: UIViewController {
         
     }
     
-    
 }
 
 
 extension FollowersListVC: UICollectionViewDelegate {
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        
         let offsetY         = scrollView.contentOffset.y
         let contentHeight   = scrollView.contentSize.height
         let height          = scrollView.frame.size.height
-        
-        
-        print("scrollViewDidEndDragging height: \(height)")
-        print("scrollViewDidEndDragging contentHeight: \(contentHeight)")
-        print("scrollViewDidEndDragging offsetY: \(offsetY)")
         
         
         if offsetY > contentHeight - height {
@@ -117,7 +128,18 @@ extension FollowersListVC: UICollectionViewDelegate {
             getFollowers(page: page)
         }
     }
+}
+
+
+extension FollowersListVC: UISearchResultsUpdating, UISearchBarDelegate {
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let text = searchController.searchBar.text, !(text.isEmpty) else { return }
+        let filteredFollowers = followers.filter { $0.login.lowercased().contains(text.lowercased()) }
+        updateData(on: filteredFollowers)
+    }
     
-    
-    
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        updateData(on: self.followers)
+    }
 }

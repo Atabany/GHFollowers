@@ -50,6 +50,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let tabBar = UITabBarController()
         UITabBar.appearance().tintColor = UIColor.systemGreen
         tabBar.viewControllers = [createSearchNC(), createFavoritesNC()]
+        
+        // the old tabbar appearance 
+        if #available(iOS 13.0, *) {
+            let tabBarAppearance: UITabBarAppearance = UITabBarAppearance()
+            tabBarAppearance.configureWithDefaultBackground()
+//            tabBarAppearance.backgroundColor = UIColor.tabBarBackground
+            UITabBar.appearance().standardAppearance = tabBarAppearance
+
+            if #available(iOS 15.0, *) {
+                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+            }
+        }
         return tabBar
     }
     
