@@ -11,7 +11,7 @@ class FavoriteListVC: UIViewController {
 
     private let callToActionButton = GFButton(backgroundColor: .systemPink, title: "Search")
     let tableView = UITableView()
-    var favorties: [Follower] = []
+    var favorites: [Follower] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,9 +25,12 @@ class FavoriteListVC: UIViewController {
     
     
     private func configureVC() {
-        self.view.backgroundColor = UIColor.systemBackground
+        view.backgroundColor = UIColor.systemBackground
+        tableView.backgroundColor = .systemBackground
+        navigationController?.navigationBar.prefersLargeTitles = true
         configureTableView()
     }
+    
     
     private func configureTableView() {
         view.addSubview(tableView)
@@ -40,21 +43,37 @@ class FavoriteListVC: UIViewController {
     
     
     private func fetchFavorites() {
-        PersistenceManager.retrieveFavorites { result in
+        PersistenceManager.retrieveFavorites { [weak self] result in
+            guard let self = self else {return}
             switch result {
             case .success(let favorites):
-                self.favorties = favorites
-                self.tableView.reloadData()
+                self.favorites = favorites
+                if favorites.isEmpty { self.updateEmptyState() }
+                else {
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                        self.view.bringSubviewToFront(self.tableView)
+                    }
+                }
+
+                break
             case .failure(let error):
+                DispatchQueue.main.async {
+                    self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue, buttonTitle: "Ok")
+                }
                 break
             }
         }
     }
     
     
+    private func updateEmptyState() {
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.showEmptyStateView(with: "No Favorites?\n Add one on the followers screen.", in: self.view)
+        }
 
-    
-    
+    }
     
     
 }
@@ -68,7 +87,7 @@ extension FavoriteListVC: UITableViewDataSource {
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return favorties.count
+        return favorites.count
     }
     
     
@@ -76,9 +95,9 @@ extension FavoriteListVC: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteCell.reuseId, for: indexPath) as? FavoriteCell else {
             return UITableViewCell()
         }
-        guard indexPath.row < self.favorties.count else {return UITableViewCell()}
-        let follower = favorties[indexPath.row]
-        cell.set(follower: follower)
+        guard indexPath.row < self.favorites.count else {return UITableViewCell()}
+        let favorite = favorites[indexPath.row]
+        cell.set(favorite: favorite)
         return cell
     }
 }
@@ -86,19 +105,37 @@ extension FavoriteListVC: UITableViewDataSource {
 extension FavoriteListVC: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let user = favorties[indexPath.row]
+        let user = favorites[indexPath.row]
         let vc = UserInfoVC()
         vc.userName = user.login
         vc.delegate = self
-        present(vc, animated: true)
+        let nav = UINavigationController(rootViewController: vc)
+        present(nav, animated: true)
     }
 }
 
 
 extension FavoriteListVC: FollwersListViewControllerDelegate {
     func didRequestFollowers(for username: String) {
-        let vc = FollowersListVC()
-        vc.username = username
+        let vc = FollowersListVC(username: username)
         self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        guard editingStyle == .delete else {return}
+        let favorite = favorites[indexPath.row]
+        PersistenceManager.updateWith(favorite: favorite, actionType: .remove) { [weak self] error in
+            guard let self = self else {return}
+            if let error = error {
+                self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue , buttonTitle: "Ok")
+                return
+            }
+            self.favorites.remove(at: indexPath.row)
+            self.tableView.deleteRows(at: [indexPath], with: .automatic)
+            if self.favorites.isEmpty {
+                self.updateEmptyState()
+            }
+            
+        }
     }
 }

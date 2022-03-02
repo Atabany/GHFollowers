@@ -25,6 +25,7 @@ class SearchVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: true)
+        usernameTF.text = ""
     }
     
     
@@ -47,9 +48,8 @@ class SearchVC: UIViewController {
             presentGFAlertOnMainThread(title: "Empty Username", message: "please enter your username we need to know who to look for 😀.", buttonTitle: "Get Followers")
             return
         }
-        let followersVC = FollowersListVC()
-        followersVC.username = usernameTF.text
-        followersVC.title = usernameTF.text
+        usernameTF.resignFirstResponder()
+        let followersVC = FollowersListVC(username: usernameTF.text!)
         navigationController?.pushViewController(followersVC, animated: true)
     }
     
@@ -66,7 +66,7 @@ class SearchVC: UIViewController {
         logoIV.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            logoIV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 80),
+            logoIV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 120),
             logoIV.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             logoIV.heightAnchor.constraint(equalToConstant: 200),
             logoIV.widthAnchor.constraint(equalToConstant: 200)

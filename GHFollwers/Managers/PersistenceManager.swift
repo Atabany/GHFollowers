@@ -21,6 +21,11 @@ enum PersistenceManager {
     }
     
     
+    
+    static func removeAll() {
+        defaults.removeObject(forKey: "favorites")
+    }
+    
     static func updateWith(favorite: Follower, actionType: PersistenceActionType, completed: @escaping (GFError?)->()) {
         retrieveFavorites { result in
             switch result {

@@ -10,6 +10,7 @@ import Foundation
 enum GFError: String, Error {
    
     case badStuffHappend    = "Bad Stuff Happened"
+    case somethingWentWrong = "Something went wrong"
     case invalidUsername    = "This username created an invalid request. Please try again."
     case invalidURL         = "This url  is  invalid . Please try again."
     case unableToComplete   =  "unable to complete your request. please check your internet connection"

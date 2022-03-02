@@ -68,7 +68,7 @@ class UserInfoVC: UIViewController {
                 }
             case .failure(let error):
                 DispatchQueue.main.async {
-                    self.presentGFAlertOnMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "Ok")
+                    self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue, buttonTitle: "Ok")
                 }
             }
         }

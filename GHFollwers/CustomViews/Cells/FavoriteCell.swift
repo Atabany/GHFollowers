@@ -25,9 +25,9 @@ class FavoriteCell: UITableViewCell {
     
     
     
-    func set(follower: Follower) {
-        usernameLabel.text = follower.login
-        avatarImageView.setImage(from: follower.avatarUrl)
+    func set(favorite: Follower) {
+        usernameLabel.text = favorite.login
+        avatarImageView.setImage(from: favorite.avatarUrl)
         avatarImageView.contentMode = .scaleAspectFit
     }
     
@@ -39,20 +39,22 @@ class FavoriteCell: UITableViewCell {
     private func configure() {
         contentView.addSubview(avatarImageView)
         contentView.addSubview(usernameLabel)
+        accessoryType = .disclosureIndicator
+        selectionStyle = .none
             
         let padding: CGFloat = 12
         
         NSLayoutConstraint.activate([
             avatarImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             avatarImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
-            avatarImageView.widthAnchor.constraint(equalToConstant: 80),
+            avatarImageView.widthAnchor.constraint(equalToConstant: 60),
             avatarImageView.heightAnchor.constraint(equalTo: avatarImageView.widthAnchor),
             
             
-            usernameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: padding),
+            usernameLabel.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor),
+            usernameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 24),
             usernameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
-//            usernameLabel.heightAnchor.constraint(equalToConstant: 20),
-            usernameLabel.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor)
+            usernameLabel.heightAnchor.constraint(equalToConstant: 40),
         
         ])
         
