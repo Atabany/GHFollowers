@@ -9,13 +9,11 @@ import UIKit
 
 class GFTabBarController: UITabBarController {
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureAppearance()
         viewControllers = [createSearchNC(), createFavoritesNC()]
     }
-    
     
     
     func configureAppearance() {

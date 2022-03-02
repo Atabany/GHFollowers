@@ -11,7 +11,7 @@ class GFAvatarImageView: UIImageView {
     
     let cashe = NetworkManager.shared.cashe
     
-    let placeholderImage    = UIImage(named: "avatar-placeholder")!
+    let placeholderImage    = Images.avatarPlaceHolder
     
     override init(frame: CGRect) {
         super.init(frame: frame)

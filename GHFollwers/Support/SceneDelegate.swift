@@ -16,7 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // 2. set windowscene
         // 3. root vc
         // 4. make key and visible
-        configureNavigationBar()
+        Theme.configureNavigationBar()
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
@@ -25,12 +25,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     
-    
-    
-    
-    func configureNavigationBar() {
-        UINavigationBar.appearance().tintColor = .systemGreen
-    }
 
 
     

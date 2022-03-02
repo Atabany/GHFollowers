@@ -53,6 +53,7 @@ class SearchVC: UIViewController {
         navigationController?.pushViewController(followersVC, animated: true)
     }
     
+    
     private func configureScreen() {
         configureLogoIV()
         configureCallToActionButton()
@@ -60,17 +61,33 @@ class SearchVC: UIViewController {
     }
     
     
+    var topImageContstraint: NSLayoutConstraint!
     private func configureLogoIV() {
         view.addSubview(logoIV)
-        logoIV.image = #imageLiteral(resourceName: "gh-logo")
+        logoIV.image =  Images.ghLogo
         logoIV.translatesAutoresizingMaskIntoConstraints = false
+        
+        let topConstraintConstant: CGFloat = DeviceTypes.isiPhoneSE || DeviceTypes.isiPhone8PlusZoomed ? 20 : 80
+        topImageContstraint = logoIV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -500)
+        topImageContstraint.isActive = true
 
+        logoIV.frame = CGRect(x: 0, y: -100, width: 200, height: 200)
+        UIView.animate(withDuration: 1) {
+            
+        }
         NSLayoutConstraint.activate([
-            logoIV.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 120),
             logoIV.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             logoIV.heightAnchor.constraint(equalToConstant: 200),
             logoIV.widthAnchor.constraint(equalToConstant: 200)
         ])
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.topImageContstraint.constant = topConstraintConstant
+            print(topConstraintConstant)
+            UIView.animate(withDuration: 1) {
+                self.view.layoutIfNeeded()
+            }
+        }
     }
 
 
@@ -89,14 +106,23 @@ class SearchVC: UIViewController {
     private func configureCallToActionButton() {
         view.addSubview(callToActionButton)
         callToActionButton.addTarget(self, action: #selector(pushFollowerListVC), for: .touchUpInside)
+        
+        let bottomButtonConstraint =  callToActionButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 500)
+        bottomButtonConstraint.isActive = true
         NSLayoutConstraint.activate([
-            callToActionButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -50),
             callToActionButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
             callToActionButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
             callToActionButton.heightAnchor.constraint(equalToConstant: 50)
         ])
-    }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            bottomButtonConstraint.constant = -50
+            UIView.animate(withDuration: 1) {
+                self.view.layoutIfNeeded()
+            }
+        }
 
+    }
 }
 
 

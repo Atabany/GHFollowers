@@ -28,12 +28,10 @@ class GFTextField: UITextField {
     
     
     private func configure() {
-        self.translatesAutoresizingMaskIntoConstraints = false
-        
-        self.layer.cornerRadius = 10
-        self.layer.borderColor = UIColor.systemGray4.cgColor
-        self.layer.borderWidth = 2
-        
+        translatesAutoresizingMaskIntoConstraints = false
+        layer.cornerRadius = 10
+        layer.borderColor = UIColor.systemGray4.cgColor
+        layer.borderWidth = 2
         textColor = .label
         tintColor = .label
         textAlignment = .center
@@ -44,6 +42,8 @@ class GFTextField: UITextField {
         autocorrectionType = .no
         returnKeyType = .go
         clearButtonMode = .whileEditing
+        autocorrectionType = .no
+        spellCheckingType = .no
     }
 
 }
