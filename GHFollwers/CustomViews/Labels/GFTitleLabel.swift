@@ -20,13 +20,12 @@ class GFTitleLabel: UILabel {
     }
     
     
-    init(textAlignment: NSTextAlignment, fontSize: CGFloat) {
-        super.init(frame: .zero)
+    convenience init(textAlignment: NSTextAlignment, fontSize: CGFloat) {
+        self.init(frame: .zero)
         self.textAlignment = textAlignment
         font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
-        configure()
     }
-    
+        
     
     private func configure() {
         textColor                   = .label
@@ -38,3 +37,4 @@ class GFTitleLabel: UILabel {
     
 
 }
+

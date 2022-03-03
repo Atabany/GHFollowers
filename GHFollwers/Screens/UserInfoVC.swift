@@ -8,23 +8,32 @@
 import UIKit
 
 protocol UserInfoVCDelegate: AnyObject {
-    func didTapGithubProfile(for user: User)
-    func didTapGetFollowers(for user: User)
+    func didRequestFollowers(for username: String)
 }
 
-class UserInfoVC: UIViewController {
+class UserInfoVC: UIViewController, Loadable {
+    var containerView: UIView!
+    
     //MARK: - Variable - Components
     var userName: String!
     let headerView = UIView()
     let itemViewOne = UIView()
     let itemViewTwo = UIView()
     let dateLabel = GFBodyLabel(textAlignment: .center)
-    weak var delegate: FollwersListViewControllerDelegate!
+    weak var delegate: UserInfoVCDelegate!
     
+//    var containerView: UIView!
+    
+
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.addSubviews(headerView,
+                          itemViewOne,
+                          itemViewTwo,
+                          dateLabel)
+        
         configure()
         
     }
@@ -89,7 +98,7 @@ class UserInfoVC: UIViewController {
         add(childVC: followersItemVC, to: self.itemViewTwo)
         
         
-        dateLabel.text = "On Github since" + " " + (user.createdAt?.convertToDisplayFormat() ?? "")
+        dateLabel.text = "On Github since" + " " + (user.createdAt?.convertToMonthYearString() ?? "")
     }
     
 
@@ -102,7 +111,6 @@ class UserInfoVC: UIViewController {
          itemViewTwo,
          dateLabel]
             .forEach {
-                view.addSubview($0)
                 $0.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
                     $0.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
@@ -115,7 +123,7 @@ class UserInfoVC: UIViewController {
             
             
             headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            headerView.heightAnchor.constraint(equalToConstant: 200),
+            headerView.heightAnchor.constraint(equalToConstant: 210),
             
             
             itemViewOne.topAnchor.constraint(equalTo: headerView.bottomAnchor, constant: padding),
@@ -148,7 +156,7 @@ extension UserInfoVC {
 
 
 //MARK: -  Delegate
-extension UserInfoVC: UserInfoVCDelegate {
+extension UserInfoVC: GFFollowerItemSubVCDelegate, GFRepoItemSubVCelegate {
     
     func didTapGithubProfile(for user: User) {
         guard let url = URL(string: user.htmlUrl ?? "") else {

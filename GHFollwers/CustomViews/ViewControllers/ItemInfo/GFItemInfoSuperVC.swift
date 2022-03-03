@@ -7,6 +7,9 @@
 
 import UIKit
 
+
+
+
 class GFItemInfoSuperVC: UIViewController {
     
     //MARK: - Variables - Components
@@ -17,7 +20,6 @@ class GFItemInfoSuperVC: UIViewController {
     
     
     var user: User!
-    weak var delegate: UserInfoVCDelegate!
     
     
     init(user: User) {
@@ -52,7 +54,7 @@ class GFItemInfoSuperVC: UIViewController {
         view.layer.cornerRadius = 18
         view.backgroundColor = .secondarySystemBackground
     }
-    
+     
     
     private func configureStackView() {
         infoItemsStackView.axis          = .horizontal
@@ -62,11 +64,9 @@ class GFItemInfoSuperVC: UIViewController {
     }
     
     private func layoutUI() {
-        [actionButton, infoItemsStackView].forEach { view.addSubview($0); $0.translatesAutoresizingMaskIntoConstraints = false }
-        
-        
+        view.addSubviews(actionButton, infoItemsStackView)
+        infoItemsStackView.translatesAutoresizingMaskIntoConstraints = false
         let padding: CGFloat = 20
-        
         NSLayoutConstraint.activate([
             infoItemsStackView.topAnchor.constraint(equalTo: view.topAnchor, constant: padding),
             infoItemsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),

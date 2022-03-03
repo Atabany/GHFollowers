@@ -6,10 +6,14 @@
 //
 
 import UIKit
+protocol GFRepoItemSubVCelegate: AnyObject {
+    func didTapGithubProfile(for user: User)
+}
 
 class GFRepoItemSubVC: GFItemInfoSuperVC {
     
-    
+    var delegate: GFRepoItemSubVCelegate!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         configureItems()

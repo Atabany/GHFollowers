@@ -20,8 +20,6 @@ enum Images {
     static let avatarPlaceHolder = UIImage(named: "avatar-placeholder")!
     static let ghLogo = UIImage(named: "gh-logo")!
     static let emptyStateLogo = UIImage(named: "empty-state-logo")!
-
-
 }
 
 

@@ -43,6 +43,7 @@ class FavoriteListVC: UIViewController {
     
     
     private func fetchFavorites() {
+        
         PersistenceManager.retrieveFavorites { [weak self] result in
             guard let self = self else {return}
             switch result {
@@ -112,14 +113,6 @@ extension FavoriteListVC: UITableViewDelegate {
         let nav = UINavigationController(rootViewController: vc)
         present(nav, animated: true)
     }
-}
-
-
-extension FavoriteListVC: FollwersListViewControllerDelegate {
-    func didRequestFollowers(for username: String) {
-        let vc = FollowersListVC(username: username)
-        self.navigationController?.pushViewController(vc, animated: true)
-    }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete else {return}
@@ -138,4 +131,13 @@ extension FavoriteListVC: FollwersListViewControllerDelegate {
             
         }
     }
+}
+
+
+extension FavoriteListVC: UserInfoVCDelegate {
+    func didRequestFollowers(for username: String) {
+        let vc = FollowersListVC(username: username)
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+
 }

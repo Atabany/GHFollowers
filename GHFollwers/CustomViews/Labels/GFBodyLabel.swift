@@ -20,20 +20,20 @@ class GFBodyLabel: UILabel {
     }
     
     
-    init(textAlignment: NSTextAlignment) {
-        super.init(frame: .zero)
+    convenience init(textAlignment: NSTextAlignment) {
+        self.init(frame: .zero)
         self.textAlignment = textAlignment
-        configure()
     }
     
     
     private func configure() {
         font = UIFont.preferredFont(forTextStyle: .body)
         numberOfLines = 0
-        textColor                   = .secondaryLabel
-        adjustsFontSizeToFitWidth   = true
-        minimumScaleFactor          = 0.75
-        lineBreakMode               = .byWordWrapping
+        textColor                           = .secondaryLabel
+        adjustsFontSizeToFitWidth           = true
+        adjustsFontForContentSizeCategory   = true
+        minimumScaleFactor                  = 0.75
+        lineBreakMode                       = .byWordWrapping
         translatesAutoresizingMaskIntoConstraints = false
     }
     

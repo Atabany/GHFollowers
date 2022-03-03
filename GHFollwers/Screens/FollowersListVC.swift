@@ -6,12 +6,12 @@
 //
 
 import UIKit
-protocol FollwersListViewControllerDelegate: AnyObject {
-    func didRequestFollowers(for username: String)
-}
 
 
-class FollowersListVC: UIViewController {
+class FollowersListVC: UIViewController, Loadable {
+    
+    var containerView: UIView!
+    
     
     //MARK: - Vars
     enum Section: CaseIterable { case main }
@@ -31,6 +31,7 @@ class FollowersListVC: UIViewController {
     //MARK: - Pagination
     var page = 1
     var hasMoreFollowers = true
+    var isLoading = false
     
     
     
@@ -82,7 +83,6 @@ class FollowersListVC: UIViewController {
     func configureSearchController() {
         searchController                                   = UISearchController()
         searchController.searchResultsUpdater                  = self
-        searchController.searchBar.delegate                    = self
         searchController.searchBar.placeholder                 = "Search for a username"
         searchController.obscuresBackgroundDuringPresentation  = false
         navigationItem.searchController                        = searchController
@@ -91,7 +91,9 @@ class FollowersListVC: UIViewController {
     
     
     private func configureCollectionView() {
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: UIHelper.configureColoumnsFlowLayout(in: view, with: 3))
+        let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.configureColoumnsFlowLayout(in: self.view, with: 3)
+        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
         collectionView.delegate = self
         view.addSubview(collectionView)
         collectionView.backgroundColor = .systemBackground
@@ -111,7 +113,7 @@ class FollowersListVC: UIViewController {
                 PersistenceManager.updateWith(favorite: follower, actionType: .add) { [weak self] error in
                     guard let self = self else {return}
                     guard  error == nil else {
-                        self.presentGFAlertOnMainThread(title: GFError.badStuffHappend.rawValue, message: error?.rawValue ?? "", buttonTitle: "Ok")
+                        self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error?.rawValue ?? "", buttonTitle: "Ok")
                         return
                     }
                     self.presentGFAlertOnMainThread(title: "Success!", message: "You have successfully added the user to the favorites 🎉", buttonTitle: "Hooray!")
@@ -119,7 +121,7 @@ class FollowersListVC: UIViewController {
                 }
             case .failure(let error):
                 DispatchQueue.main.async {
-                    self.presentGFAlertOnMainThread(title: GFError.badStuffHappend.rawValue, message:error.rawValue, buttonTitle: "OK")
+                    self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message:error.rawValue, buttonTitle: "OK")
                 }
             }
         }
@@ -129,6 +131,8 @@ class FollowersListVC: UIViewController {
     
     //MARK: - Get Data
     private func getFollowers(page: Int) {
+        guard !isLoading else {return}
+        isLoading = true
         self.showLoadingView()
         NetworkManager.shared.getFollowers(for: username, page: page) { [weak self] result in
             guard let self = self else {return}
@@ -150,12 +154,13 @@ class FollowersListVC: UIViewController {
                 self.updateData(on: self.followers)
             case .failure(let error):
                 DispatchQueue.main.async {
-                    self.presentGFAlertOnMainThread(title: GFError.badStuffHappend.rawValue, message: error.rawValue, buttonTitle: "Ok")
+                    self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue, buttonTitle: "Ok")
 //                    self.showEmptyStateView(with: error.rawValue, in: self.view)
                     self.navigationItem.searchController?.searchBar.isHidden = true
                 }
                 return
             }
+            self.isLoading = false
         }
     }
     
@@ -187,7 +192,7 @@ extension FollowersListVC: UICollectionViewDelegate {
         let contentHeight   = scrollView.contentSize.height
         let height          = scrollView.frame.size.height
         if offsetY > contentHeight - height {
-            guard hasMoreFollowers else {return}
+            guard hasMoreFollowers, !isLoading else {return}
             page += 1
             getFollowers(page: page)
         }
@@ -207,25 +212,19 @@ extension FollowersListVC: UICollectionViewDelegate {
 }
 
 
-extension FollowersListVC: UISearchResultsUpdating, UISearchBarDelegate {
+extension FollowersListVC: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
-        guard let filter = searchController.searchBar.text, !(filter.isEmpty) else { return }
+        guard let filter = searchController.searchBar.text, !(filter.isEmpty) else {
+            updateData(on: self.followers)
+            return
+        }
         let filteredFollowers = followers.filter { $0.login.lowercased().contains(filter.lowercased()) }
         updateData(on: filteredFollowers)
-    }
-    
-    
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        updateData(on: self.followers)
-    }
-    
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        updateData(on: self.followers)
     }
 }
 
 
-extension FollowersListVC: FollwersListViewControllerDelegate {
+extension FollowersListVC: UserInfoVCDelegate {
     func didRequestFollowers(for username: String) {
         self.username = username
         title = username
@@ -234,6 +233,7 @@ extension FollowersListVC: FollwersListViewControllerDelegate {
         hasMoreFollowers = true
         updateData(on: followers)
         getFollowers(page: page)
+//        collectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: true)
         searchController.isActive = false
     }
 }

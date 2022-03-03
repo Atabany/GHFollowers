@@ -19,7 +19,9 @@ class SearchVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.systemBackground
-        configure()        
+        view.addSubviews(logoIV, usernameTF, callToActionButton)
+        configure()
+        
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -44,7 +46,6 @@ class SearchVC: UIViewController {
     @objc
     private func pushFollowerListVC() {
         guard isUsernameEntered else {
-            print("No username");
             presentGFAlertOnMainThread(title: "Empty Username", message: "please enter your username we need to know who to look for 😀.", buttonTitle: "Get Followers")
             return
         }
@@ -63,7 +64,7 @@ class SearchVC: UIViewController {
     
     var topImageContstraint: NSLayoutConstraint!
     private func configureLogoIV() {
-        view.addSubview(logoIV)
+        
         logoIV.image =  Images.ghLogo
         logoIV.translatesAutoresizingMaskIntoConstraints = false
         
@@ -83,7 +84,6 @@ class SearchVC: UIViewController {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.topImageContstraint.constant = topConstraintConstant
-            print(topConstraintConstant)
             UIView.animate(withDuration: 1) {
                 self.view.layoutIfNeeded()
             }
@@ -92,7 +92,6 @@ class SearchVC: UIViewController {
 
 
     private func configureUsernameTF() {
-        view.addSubview(usernameTF)
         usernameTF.delegate = self
         NSLayoutConstraint.activate([
             usernameTF.topAnchor.constraint(equalTo: logoIV.bottomAnchor, constant: 48),
@@ -104,7 +103,6 @@ class SearchVC: UIViewController {
 
 
     private func configureCallToActionButton() {
-        view.addSubview(callToActionButton)
         callToActionButton.addTarget(self, action: #selector(pushFollowerListVC), for: .touchUpInside)
         
         let bottomButtonConstraint =  callToActionButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 500)

@@ -17,7 +17,7 @@ class GFUserInfoHeaderVC: UIViewController {
     private let locationImageView   = UIImageView()
     private let locationLabel       = GFSecondaryTitleLabel(fontSize: 18)
     private let bioLabel            = GFBodyLabel(textAlignment: .left)
-    private let usernameStackView   = UIStackView()
+
     
     
     private let headerView = UIView()
@@ -69,23 +69,19 @@ class GFUserInfoHeaderVC: UIViewController {
     
     
     private func addSubViews() {
-        [avatarImageView,
-         usernameStackView,
-         usernameLabel,
-         nameLabel,
-         locationImageView,
-         locationLabel,
-         bioLabel
-        ].forEach {
-            view.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
+        view.addSubviews(avatarImageView,
+                         usernameLabel,
+                         nameLabel,
+                         locationImageView,
+                         locationLabel,
+                         bioLabel)
     }
     
     private func layoutUI() {
         
         let padding: CGFloat = 20
         let textImagePadding: CGFloat = 12
+        locationImageView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             // AvatarImageView
@@ -121,7 +117,7 @@ class GFUserInfoHeaderVC: UIViewController {
             bioLabel.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: textImagePadding),
             bioLabel.leadingAnchor.constraint(equalTo:avatarImageView.leadingAnchor),
             bioLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
-            bioLabel.heightAnchor.constraint(equalToConstant: 60)
+            bioLabel.heightAnchor.constraint(equalToConstant: 90)
             
             
             
