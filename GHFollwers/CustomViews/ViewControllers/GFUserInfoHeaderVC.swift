@@ -43,7 +43,6 @@ class GFUserInfoHeaderVC: UIViewController {
         
         configureUIElements()
         self.view.backgroundColor = UIColor.systemBackground
-        
     }
     
     
@@ -61,7 +60,7 @@ class GFUserInfoHeaderVC: UIViewController {
         locationLabel.text      = user.location ?? "No location Available"
         bioLabel.text           = user.bio ?? "No Bio Available"
         bioLabel.lineBreakMode  = .byTruncatingTail
-        bioLabel.numberOfLines  = 3
+        bioLabel.numberOfLines  = 0
         locationImageView.image = SFSymbols.location
         locationImageView.tintColor = .secondaryLabel
 
@@ -118,7 +117,7 @@ class GFUserInfoHeaderVC: UIViewController {
             bioLabel.leadingAnchor.constraint(equalTo:avatarImageView.leadingAnchor),
             bioLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
             bioLabel.heightAnchor.constraint(equalToConstant: 90)
-            
+//            bioLabel.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             
             
             

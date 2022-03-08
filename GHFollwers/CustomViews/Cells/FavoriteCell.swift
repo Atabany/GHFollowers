@@ -26,6 +26,7 @@ class FavoriteCell: UITableViewCell {
     
     
     func set(favorite: Follower) {
+        avatarImageView.image = Images.ghLogo
         usernameLabel.text = favorite.login
         avatarImageView.setImage(from: favorite.avatarUrl)
         avatarImageView.contentMode = .scaleAspectFit

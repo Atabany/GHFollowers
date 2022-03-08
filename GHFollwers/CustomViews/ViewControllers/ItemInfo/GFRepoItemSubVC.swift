@@ -14,6 +14,17 @@ class GFRepoItemSubVC: GFItemInfoSuperVC {
     
     var delegate: GFRepoItemSubVCelegate!
 
+    
+    init(user: User, delegate: GFRepoItemSubVCelegate) {
+        super.init(user: user)
+        self.delegate = delegate
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureItems()

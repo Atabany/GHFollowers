@@ -56,7 +56,6 @@ class FavoriteListVC: UIViewController {
                         self.view.bringSubviewToFront(self.tableView)
                     }
                 }
-
                 break
             case .failure(let error):
                 DispatchQueue.main.async {
@@ -73,10 +72,8 @@ class FavoriteListVC: UIViewController {
             self.tableView.reloadData()
             self.showEmptyStateView(with: "No Favorites?\n Add one on the followers screen.", in: self.view)
         }
-
     }
-    
-    
+        
 }
 
 
@@ -116,8 +113,7 @@ extension FavoriteListVC: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete else {return}
-        let favorite = favorites[indexPath.row]
-        PersistenceManager.updateWith(favorite: favorite, actionType: .remove) { [weak self] error in
+        PersistenceManager.updateWith(favorite: favorites[indexPath.row], actionType: .remove) { [weak self] error in
             guard let self = self else {return}
             if let error = error {
                 self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue , buttonTitle: "Ok")
@@ -128,7 +124,6 @@ extension FavoriteListVC: UITableViewDelegate {
             if self.favorites.isEmpty {
                 self.updateEmptyState()
             }
-            
         }
     }
 }

@@ -14,6 +14,16 @@ class GFFollowerItemSubVC: GFItemInfoSuperVC {
     
     
     var delegate: GFFollowerItemSubVCDelegate!
+    
+    init(user: User, delegate: GFFollowerItemSubVCDelegate) {
+        super.init(user: user)
+        self.delegate = delegate
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 
     //MARK: - Variables - components
     override func viewDidLoad() {

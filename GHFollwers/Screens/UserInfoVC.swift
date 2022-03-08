@@ -15,6 +15,11 @@ class UserInfoVC: UIViewController, Loadable {
     var containerView: UIView!
     
     //MARK: - Variable - Components
+    let scrollView = UIScrollView()
+    let contentView = UIView()
+    
+    
+    
     var userName: String!
     let headerView = UIView()
     let itemViewOne = UIView()
@@ -29,18 +34,16 @@ class UserInfoVC: UIViewController, Loadable {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubviews(headerView,
-                          itemViewOne,
-                          itemViewTwo,
-                          dateLabel)
         
         configure()
         
+        self.navigationController?.navigationBar.backgroundColor = UIColor.systemBackground
     }
     
     
     func configure() {
         configureVC()
+        configureScrollView()
         layoutUI()
         getUserData()
     }
@@ -50,6 +53,7 @@ class UserInfoVC: UIViewController, Loadable {
         view.backgroundColor = .systemBackground
         configureNavBar()
     }
+    
     
     func configureNavBar() {
         let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(self.dismissVC))
@@ -61,6 +65,19 @@ class UserInfoVC: UIViewController, Loadable {
     func dismissVC() {
         dismiss(animated: true)
     }
+    
+    
+    private func configureScrollView() {
+        view.addSubviews(scrollView)
+        scrollView.addSubview(contentView)
+        scrollView.pinToEdges(of: self.view)
+        contentView.pinToEdges(of: scrollView)
+        contentView.widthAnchor.constraint(equalTo: self.view.widthAnchor).isActive = true
+        let heightAnchor = contentView.heightAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.heightAnchor)
+        heightAnchor.isActive = true
+        heightAnchor.priority = UILayoutPriority(rawValue: 250)
+    }
+    
     
     
     func getUserData() {
@@ -86,26 +103,21 @@ class UserInfoVC: UIViewController, Loadable {
     
     func configureUIElements(with user: User) {
         add(childVC: GFUserInfoHeaderVC(user: user), to: self.headerView)
-        
-        
-        let reposItemVC = GFRepoItemSubVC(user: user)
-        reposItemVC.delegate = self
-        add(childVC: reposItemVC, to: self.itemViewOne)
-
-        
-        let followersItemVC = GFFollowerItemSubVC(user: user)
-        followersItemVC.delegate = self
-        add(childVC: followersItemVC, to: self.itemViewTwo)
-        
-        
+        add(childVC: GFRepoItemSubVC(user: user, delegate: self), to: self.itemViewOne)
+        add(childVC: GFFollowerItemSubVC(user: user, delegate: self), to: self.itemViewTwo)
         dateLabel.text = "On Github since" + " " + (user.createdAt?.convertToMonthYearString() ?? "")
+
     }
     
 
     func layoutUI () {
         let padding: CGFloat = 20
         let itemHeight: CGFloat = 140
-        
+        contentView.addSubviews(headerView,
+                          itemViewOne,
+                          itemViewTwo,
+                          dateLabel)
+
         [headerView,
          itemViewOne,
          itemViewTwo,
@@ -113,16 +125,19 @@ class UserInfoVC: UIViewController, Loadable {
             .forEach {
                 $0.translatesAutoresizingMaskIntoConstraints = false
                 NSLayoutConstraint.activate([
-                    $0.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-                    $0.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding)
+                    $0.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+                    $0.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding)
                 ])
             }
         
         
+        let x = dateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -50)
+        x.isActive = true
+        x.priority = UILayoutPriority(rawValue: 750)
+        
         NSLayoutConstraint.activate([
             
-            
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            headerView.topAnchor.constraint(equalTo: contentView.topAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 210),
             
             
@@ -133,8 +148,9 @@ class UserInfoVC: UIViewController, Loadable {
             itemViewTwo.topAnchor.constraint(equalTo: itemViewOne.bottomAnchor, constant: padding),
             itemViewTwo.heightAnchor.constraint(equalToConstant: itemHeight),
             
-            dateLabel.topAnchor.constraint(equalTo: itemViewTwo.bottomAnchor, constant: padding),
-            dateLabel.heightAnchor.constraint(equalToConstant: 20)
+            
+            dateLabel.topAnchor.constraint(greaterThanOrEqualTo: itemViewTwo.bottomAnchor, constant: padding),
+            dateLabel.heightAnchor.constraint(equalToConstant: 20),
 
             
         ])
