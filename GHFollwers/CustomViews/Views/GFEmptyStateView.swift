@@ -45,9 +45,8 @@ class GFEmptyStateView: UIView {
         logoIV.translatesAutoresizingMaskIntoConstraints = false
         logoIV.image                                     =  Images.emptyStateLogo
         let logoIVBottomConstant: CGFloat = DeviceTypes.isiPhoneSE || DeviceTypes.isiPhone8PlusZoomed ? 80 : 40
-        let logoIVBottomConstraint = logoIV.bottomAnchor.constraint(equalTo: bottomAnchor, constant: logoIVBottomConstant)
-        logoIVBottomConstraint.isActive = true
         NSLayoutConstraint.activate([
+            logoIV.bottomAnchor.constraint(equalTo: bottomAnchor, constant: logoIVBottomConstant),
             logoIV.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 1.3),
             logoIV.heightAnchor.constraint(equalTo: widthAnchor, multiplier: 1.3),
             logoIV.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 170),
@@ -60,12 +59,11 @@ class GFEmptyStateView: UIView {
         messageLabel.numberOfLines  =  3
         messageLabel.textColor      = .secondaryLabel
         
-        let messagelabelCenterYConstant: CGFloat = DeviceTypes.isiPhoneSE || DeviceTypes.isiPhone8PlusZoomed ? -80 : -150
-        let messageLabelCenterYConstraint = messageLabel.centerYAnchor.constraint(equalTo: centerYAnchor, constant: messagelabelCenterYConstant)
-        messageLabelCenterYConstraint.isActive = true
+        let messagelabelCenterYConstant: CGFloat = DeviceTypes.isiPhoneSE || DeviceTypes.isiPhone8PlusZoomed ? -80 : -150        
         
         
         NSLayoutConstraint.activate([
+            messageLabel.centerYAnchor.constraint(equalTo: centerYAnchor, constant: messagelabelCenterYConstant),
             messageLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 40),
             messageLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -40),
             messageLabel.heightAnchor.constraint(equalToConstant: 200),

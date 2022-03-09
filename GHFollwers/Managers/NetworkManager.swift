@@ -7,9 +7,15 @@
 
 import UIKit
 class NetworkManager {
+    
     static let shared = NetworkManager()
     let cashe = NSCache<NSString, UIImage>()
-    private init() {}
+    let decoder                 =  JSONDecoder()
+    
+    private init() {
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .iso8601
+    }
     
     let baseURL = "https://api.github.com"
     
@@ -19,20 +25,17 @@ class NetworkManager {
         urlComponents.host = "api.github.com"
         return urlComponents
     }
-
     
-    func getFollowers(for username: String, page: Int, completed: @escaping (Result<[Follower], GFError>) -> Void ) {
-        guard let url = _gitHubURL(with: "/users/\(username)/followers", query: ["per_page": "100", "page": String(page)]) else {
-            completed(.failure(.invalidURL))
-            return
-        }
-        _sendGHRequest(from: url, modelType: [Follower].self) { result in completed(result); return }
+    
+    func getFollowers(for username: String, page: Int) async throws -> [Follower] {
+        guard let url = _gitHubURL(with: "/users/\(username)/followers", query: ["per_page": "100", "page": String(page)]) else { throw GFError.invalidURL }
+        return try await _sendGHRequest(from: url, modelType: [Follower].self)
     }
     
     
-    func getUser(for username: String, completed: @escaping (Result<User, GFError>) -> Void ) {
-        guard let url = _gitHubURL(with: "/users/\(username)") else { completed(.failure(.invalidURL)); return }
-        _sendGHRequest(from: url, modelType: User.self) { result in completed(result); return }
+    func getUser(for username: String) async throws -> User {
+        guard let url = _gitHubURL(with: "/users/\(username)") else { throw GFError.invalidURL }
+        return try await _sendGHRequest(from: url, modelType: User.self)
     }
     
 }
@@ -40,34 +43,13 @@ class NetworkManager {
 
 extension NetworkManager {
     
-    func _sendGHRequest<T: Codable>(from url: URL, modelType: T.Type, completed: @escaping (Result<T, GFError>) -> Void ) {
-        
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            guard error == nil else {
-                completed(.failure(.unableToComplete))
-                return
-            }
-            guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
-                completed(.failure(.invalidResponse))
-                return
-            }
-            guard let data = data else {
-                completed(.failure(.invalidData))
-                return
-            }
-            do {
-                let decoder                 =  JSONDecoder()
-                decoder.keyDecodingStrategy = .convertFromSnakeCase
-                decoder.dateDecodingStrategy = .iso8601
-                let model                   =  try decoder.decode(T.self, from: data)
-                completed(.success(model))
-                return
-            } catch {
-                completed(.failure(.invalidData))
-                return
-            }
+    func _sendGHRequest<T: Codable>(from url: URL, modelType: T.Type) async throws -> T {
+        let (data, response)  = try await URLSession.shared.data(from: url)
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw GFError.invalidResponse
         }
-        task.resume()
+        do { return try decoder.decode(T.self, from: data) }
+        catch { throw GFError.invalidData }
     }
     
     
@@ -92,26 +74,19 @@ extension NetworkManager {
 
 //MARK: -  Image
 extension NetworkManager {
-    func downloadImage(from urlString: String, completion: @escaping (UIImage?) -> ()  ) {
+    func downloadImage(from urlString: String) async -> UIImage? {
         let casheKey = NSString(string: urlString)
-        if let image = cashe.object(forKey: casheKey) {
-            completion(image)
-            return
-        }
-        guard let url = URL(string: urlString) else {return}
-        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            guard let self = self,
-                  error == nil,
-                  let response = response as? HTTPURLResponse, response.statusCode == 200,
-                  let data = data,
-                  let image = UIImage(data: data) else {
-                      completion(nil)
-                      return
-                  }
+        if let image = cashe.object(forKey: casheKey) { return image }
+        guard let url = URL(string: urlString) else {return nil }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let image = UIImage(data: data) else { return nil }
             self.cashe.setObject(image, forKey: casheKey)
-            completion(image)
-        }
-        task.resume()
+            return image
+        } catch { return nil }
     }
 }
+
+
+
 

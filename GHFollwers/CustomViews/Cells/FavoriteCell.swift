@@ -26,6 +26,7 @@ class FavoriteCell: UITableViewCell {
     
     
     func set(favorite: Follower) {
+        avatarImageView.image = nil
         avatarImageView.image = Images.ghLogo
         usernameLabel.text = favorite.login
         avatarImageView.setImage(from: favorite.avatarUrl)
@@ -35,25 +36,26 @@ class FavoriteCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         avatarImageView.image = nil
+        avatarImageView.image = Images.ghLogo
     }
     
     private func configure() {
-        contentView.addSubviews(avatarImageView, usernameLabel)
+        addSubviews(avatarImageView, usernameLabel)
         accessoryType = .disclosureIndicator
         selectionStyle = .none
             
         let padding: CGFloat = 12
         
         NSLayoutConstraint.activate([
-            avatarImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            avatarImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: padding),
+            avatarImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            avatarImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
             avatarImageView.widthAnchor.constraint(equalToConstant: 60),
             avatarImageView.heightAnchor.constraint(equalTo: avatarImageView.widthAnchor),
             
             
             usernameLabel.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor),
             usernameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 24),
-            usernameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -padding),
+            usernameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
             usernameLabel.heightAnchor.constraint(equalToConstant: 40),
         
         ])

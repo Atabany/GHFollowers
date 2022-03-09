@@ -10,11 +10,7 @@ import UIKit
 
 extension Date {
     func convertToMonthYearString() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM yyyy"
-        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateFormatter.timeZone = .current
-        return dateFormatter.string(from: self)
+        return formatted(.dateTime.month().year().locale(Locale(identifier: "en_US_POSIX")))
     }
 }
 

@@ -9,7 +9,7 @@ import UIKit
 
 class FavoriteListVC: UIViewController {
 
-    private let callToActionButton = GFButton(backgroundColor: .systemPink, title: "Search")
+    private let callToActionButton = GFButton(color: .systemPink, title: "Search")
     let tableView = UITableView()
     var favorites: [Follower] = []
     
@@ -21,6 +21,7 @@ class FavoriteListVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchFavorites()
+        
     }
     
     
@@ -42,29 +43,34 @@ class FavoriteListVC: UIViewController {
     
     
     
+    
+    
     private func fetchFavorites() {
-        
         PersistenceManager.retrieveFavorites { [weak self] result in
             guard let self = self else {return}
             switch result {
             case .success(let favorites):
-                self.favorites = favorites
-                if favorites.isEmpty { self.updateEmptyState() }
-                else {
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                        self.view.bringSubviewToFront(self.tableView)
-                    }
-                }
-                break
+                self.updateUI(with: favorites)
             case .failure(let error):
                 DispatchQueue.main.async {
-                    self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue, buttonTitle: "Ok")
+                    self.presentGFAlert(title: GFError.somethingWentWrong.rawValue, message: error.rawValue, buttonTitle: "Ok")
                 }
-                break
+                
             }
         }
     }
+    
+    fileprivate func updateUI(with favorites : ([Follower])) {
+        self.favorites = favorites
+        if favorites.isEmpty { self.updateEmptyState() }
+        else {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+                self.view.bringSubviewToFront(self.tableView)
+            }
+        }
+    }
+    
     
     
     private func updateEmptyState() {
@@ -116,7 +122,9 @@ extension FavoriteListVC: UITableViewDelegate {
         PersistenceManager.updateWith(favorite: favorites[indexPath.row], actionType: .remove) { [weak self] error in
             guard let self = self else {return}
             if let error = error {
-                self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue , buttonTitle: "Ok")
+                DispatchQueue.main.async {
+                    self.presentGFAlert(title: GFError.somethingWentWrong.rawValue, message: error.rawValue , buttonTitle: "Ok")
+                }
                 return
             }
             self.favorites.remove(at: indexPath.row)

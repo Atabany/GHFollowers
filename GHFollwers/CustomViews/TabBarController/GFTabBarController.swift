@@ -18,17 +18,6 @@ class GFTabBarController: UITabBarController {
     
     func configureAppearance() {
         UITabBar.appearance().tintColor = UIColor.systemGreen
-        // the old tabbar appearance
-        if #available(iOS 13.0, *) {
-            let tabBarAppearance: UITabBarAppearance = UITabBarAppearance()
-            tabBarAppearance.configureWithDefaultBackground()
-            //            tabBarAppearance.backgroundColor = UIColor.tabBarBackground
-            UITabBar.appearance().standardAppearance = tabBarAppearance
-            
-            if #available(iOS 15.0, *) {
-                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-            }
-        }
     }
     
     

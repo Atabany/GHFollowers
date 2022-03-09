@@ -101,28 +101,38 @@ class FollowersListVC: UIViewController, Loadable {
     }
     
     
+    fileprivate func addUserToFavorite(_ user: (User), _ self: FollowersListVC) {
+        let follower = Follower(login: user.login ?? "", avatarUrl: user.avatarUrl ?? "")
+        PersistenceManager.updateWith(favorite: follower, actionType: .add) { [weak self] error in
+            guard let self = self else {return}
+            guard  error == nil else {
+                DispatchQueue.main.async {
+                    self.presentGFAlert(title: GFError.somethingWentWrong.rawValue, message: error?.rawValue ?? "", buttonTitle: "Ok")
+                }
+                return
+            }
+            DispatchQueue.main.async {
+                self.presentGFAlert(title: "Success!", message: "You have successfully added the user to the favorites 🎉", buttonTitle: "Hooray!")
+            }
+            return
+        }
+    }
+    
     @objc
     private func addButtonTapped() {
         showLoadingView()
-        NetworkManager.shared.getUser(for: username) { [weak self] result in
-            guard let self = self else { return }
-            self.dismissLoadingView()
-            switch result {
-            case .success(let user):
-                let follower = Follower(login: user.login ?? "", avatarUrl: user.avatarUrl ?? "")
-                PersistenceManager.updateWith(favorite: follower, actionType: .add) { [weak self] error in
-                    guard let self = self else {return}
-                    guard  error == nil else {
-                        self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error?.rawValue ?? "", buttonTitle: "Ok")
-                        return
-                    }
-                    self.presentGFAlertOnMainThread(title: "Success!", message: "You have successfully added the user to the favorites 🎉", buttonTitle: "Hooray!")
-                    return
+        Task {
+            do {
+                let user = try await NetworkManager.shared.getUser(for: username)
+                addUserToFavorite(user, self)
+                dismissLoadingView() 
+            } catch {
+                if let gfError = error as? GFError {
+                    presentGFAlert(title: GFError.somethingWentWrong.rawValue, message:gfError.rawValue, buttonTitle: "OK")
+                } else {
+                    presentDefaultError()
                 }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message:error.rawValue, buttonTitle: "OK")
-                }
+                dismissLoadingView()
             }
         }
     }
@@ -130,37 +140,37 @@ class FollowersListVC: UIViewController, Loadable {
     
     
     //MARK: - Get Data
-    private func getFollowers(page: Int) {
+    fileprivate func updateUIwith(followers: ([Follower])) {
+        if followers.count < 100 { self.hasMoreFollowers = false }
+        self.followers.append(contentsOf: followers)
+        if self.followers.isEmpty {
+            let message = "This User doesn't have any followers 😞"
+            self.showEmptyStateView(with: message, in: self.view)
+            self.navigationItem.searchController?.searchBar.isHidden = true
+            return
+        }
+        self.updateData(on: self.followers)
+    }
+    
+    private func getFollowers(page: Int)  {
         guard !isLoading else {return}
         isLoading = true
-        self.showLoadingView()
-        NetworkManager.shared.getFollowers(for: username, page: page) { [weak self] result in
-            guard let self = self else {return}
-            DispatchQueue.main.async {
-                self.dismissLoadingView()
-            }
-            switch result {
-            case .success(let followers):
-                if followers.count < 100 { self.hasMoreFollowers = false }
-                self.followers.append(contentsOf: followers)
-                if self.followers.isEmpty {
-                    let message = "This User doesn't have any followers 😞"
-                    DispatchQueue.main.async {
-                        self.showEmptyStateView(with: message, in: self.view)
-                        self.navigationItem.searchController?.searchBar.isHidden = true
-                    }
-                    return
+        showLoadingView()
+        Task {
+            do {
+                let followers = try await NetworkManager.shared.getFollowers(for: username, page: page)
+                updateUIwith(followers: followers)
+                dismissLoadingView()
+                isLoading = false
+            } catch {
+                dismissLoadingView()
+                isLoading = false
+                if let  error = error as? GFError {
+                    presentGFAlert(title: GFError.somethingWentWrong.rawValue, message: error.rawValue, buttonTitle: "Ok")
+                } else {
+                    presentDefaultError()
                 }
-                self.updateData(on: self.followers)
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue, buttonTitle: "Ok")
-//                    self.showEmptyStateView(with: error.rawValue, in: self.view)
-                    self.navigationItem.searchController?.searchBar.isHidden = true
-                }
-                return
             }
-            self.isLoading = false
         }
     }
     

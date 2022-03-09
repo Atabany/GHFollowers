@@ -27,9 +27,9 @@ class UserInfoVC: UIViewController, Loadable {
     let dateLabel = GFBodyLabel(textAlignment: .center)
     weak var delegate: UserInfoVCDelegate!
     
-//    var containerView: UIView!
+    //    var containerView: UIView!
     
-
+    
     
     
     override func viewDidLoad() {
@@ -81,23 +81,22 @@ class UserInfoVC: UIViewController, Loadable {
     
     
     func getUserData() {
-        showLoadingView()
-        NetworkManager.shared.getUser(for: userName) { [weak self] result in
-            guard let self = self else {return}
-            DispatchQueue.main.async {
-                self.dismissLoadingView()
-            }
-            switch result {
-            case .success(let user ):
-                DispatchQueue.main.async {
-                    self.configureUIElements(with: user)
+        Task {
+            do {
+                showLoadingView()
+                let user = try await NetworkManager.shared.getUser(for: userName)
+                dismissLoadingView()
+                configureUIElements(with: user)
+            } catch {
+                if let gfError = error as? GFError {
+                    presentGFAlert(title: GFError.somethingWentWrong.rawValue, message: gfError.rawValue, buttonTitle: "Ok")
+                } else {
+                    presentDefaultError()
                 }
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.presentGFAlertOnMainThread(title: GFError.somethingWentWrong.rawValue, message: error.rawValue, buttonTitle: "Ok")
-                }
+                dismissLoadingView()
             }
         }
+    
     }
     
     
@@ -106,18 +105,18 @@ class UserInfoVC: UIViewController, Loadable {
         add(childVC: GFRepoItemSubVC(user: user, delegate: self), to: self.itemViewOne)
         add(childVC: GFFollowerItemSubVC(user: user, delegate: self), to: self.itemViewTwo)
         dateLabel.text = "On Github since" + " " + (user.createdAt?.convertToMonthYearString() ?? "")
-
+        
     }
     
-
+    
     func layoutUI () {
         let padding: CGFloat = 20
         let itemHeight: CGFloat = 140
         contentView.addSubviews(headerView,
-                          itemViewOne,
-                          itemViewTwo,
-                          dateLabel)
-
+                                itemViewOne,
+                                itemViewTwo,
+                                dateLabel)
+        
         [headerView,
          itemViewOne,
          itemViewTwo,
@@ -151,7 +150,7 @@ class UserInfoVC: UIViewController, Loadable {
             
             dateLabel.topAnchor.constraint(greaterThanOrEqualTo: itemViewTwo.bottomAnchor, constant: padding),
             dateLabel.heightAnchor.constraint(equalToConstant: 20),
-
+            
             
         ])
     }
@@ -176,7 +175,7 @@ extension UserInfoVC: GFFollowerItemSubVCDelegate, GFRepoItemSubVCelegate {
     
     func didTapGithubProfile(for user: User) {
         guard let url = URL(string: user.htmlUrl ?? "") else {
-            presentGFAlertOnMainThread(title: "Invalid URL", message: "The url attached to this user is invalid", buttonTitle: "Ok")
+            presentGFAlert(title: "Invalid URL", message: "The url attached to this user is invalid", buttonTitle: "Ok")
             return
         }
         presentSafariVC(with: url)
@@ -185,7 +184,7 @@ extension UserInfoVC: GFFollowerItemSubVCDelegate, GFRepoItemSubVCelegate {
     
     func didTapGetFollowers(for user: User) {
         guard (user.followers ?? 0) > 0 else {
-            presentGFAlertOnMainThread(title: "OH Sorry", message: "This user has no followers", buttonTitle: "OK")
+            presentGFAlert(title: "OH Sorry", message: "This user has no followers", buttonTitle: "OK")
             return
         }
         delegate.didRequestFollowers(for: user.login ?? "")
